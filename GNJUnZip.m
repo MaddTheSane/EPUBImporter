@@ -40,9 +40,6 @@
 - (void)dealloc
 {
   if(unzipFile_) unzClose(unzipFile_);
-  [path_ release];
-
-  [super dealloc];
 }
 
 /**
@@ -69,8 +66,7 @@
     unzGetCurrentFileInfo(unzipFile_, &fileInfo,
                           rawFilename, sizeof(rawFilename),
                           NULL, 0, NULL, 0);
-    NSString *filename = [NSString stringWithCString:rawFilename
-                                            encoding:NSUTF8StringEncoding];
+    NSString *filename = @(rawFilename);
     [itemsArray addObject:filename];
   } while(unzGoToNextFile(unzipFile_) != UNZ_END_OF_LIST_OF_FILE);
 

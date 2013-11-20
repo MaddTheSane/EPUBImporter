@@ -15,14 +15,13 @@
 @interface GNJUnZip : NSObject
 {
   unzFile unzipFile_;
-  NSString *path_;
 }
 
 /** The path of zip file */
 @property (nonatomic, readonly) NSString *path;
 
 /** The items contained in the zip archive. */
-@property (nonatomic, readonly) NSArray *items;
+@property (unsafe_unretained, nonatomic, readonly) NSArray *items;
 
 - (id)initWithZipFile:(NSString *)path;
 - (NSData *)dataWithContentsOfFile:(NSString *)path;

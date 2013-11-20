@@ -57,64 +57,50 @@ Boolean GetMetadataForURL(void* thisInterface,
   /* Return the attribute keys and attribute values in the dict */
   /* Return TRUE if successful, FALSE if there was no data provided */
 
-  NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+  @autoreleasepool {
 
+		NSMutableDictionary *NSAttribs = (__bridge NSMutableDictionary *)attributes;
+		
   NSCharacterSet *setForTrim = [NSCharacterSet whitespaceAndNewlineCharacterSet];
 
-  NSString *path = [(NSURL *)urlForFile path];
+  NSString *path = [(__bridge NSURL *)urlForFile path];
   GNJUnZip *unzip = [[GNJUnZip alloc] initWithZipFile:path];
 
   NSData *xmlData = [unzip dataWithContentsOfFile:@"META-INF/container.xml"];
   if(!xmlData) {
-    [unzip release];
-    [pool release];
     return FALSE;
   }
   NSXMLDocument *xmlDoc = [[NSXMLDocument alloc] initWithData:xmlData
                                                       options:NSXMLDocumentTidyXML
                                                         error:NULL];
   if(!xmlDoc) {
-    [unzip release];
-    [pool release];
     return FALSE;
   }
   NSString *xpath = @"/container/rootfiles/rootfile/@full-path";
   NSArray *nodes = [xmlDoc nodesForXPath:xpath error:NULL];
   if(![nodes count]) {
     NSLog(@"no such nodes for xpath '%@'", xpath);
-    [xmlDoc release];
-    [unzip release];
-    [pool release];
     return FALSE;
   }
-  NSXMLNode *fullPathNode = [nodes objectAtIndex:0];
+  NSXMLNode *fullPathNode = nodes[0];
   NSString *fullPathValue = [fullPathNode stringValue];
   NSString *opfPath = [fullPathValue stringByTrimmingCharactersInSet:setForTrim];
   opfPath = [opfPath stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-  [xmlDoc release];
 
   xmlData = [unzip dataWithContentsOfFile:opfPath];
   if(!xmlDoc) {
-    [unzip release];
-    [pool release];
     return FALSE;
   }
   xmlDoc = [[NSXMLDocument alloc] initWithData:xmlData
                                        options:NSXMLDocumentTidyXML
                                          error:NULL];
   if(!xmlDoc) {
-    [xmlDoc release];
-    [unzip release];
-    [pool release];
     return FALSE;
   }
   xpath = @"/package/metadata/*";
   nodes = [xmlDoc nodesForXPath:xpath error:NULL];
   if(![nodes count]) {
     NSLog(@"no such nodes for xpath '%@'", xpath);
-    [xmlDoc release];
-    [unzip release];
-    [pool release];
     return FALSE;
   }
 
@@ -168,9 +154,6 @@ Boolean GetMetadataForURL(void* thisInterface,
   nodes = [xmlDoc nodesForXPath:xpath error:NULL];
   if(![nodes count]) {
     NSLog(@"no such nodes for xpath '%@'", xpath);
-    [xmlDoc release];
-    [unzip release];
-    [pool release];
     return FALSE;
   }
   NSMutableDictionary *manifest = [NSMutableDictionary dictionary];
@@ -180,21 +163,18 @@ Boolean GetMetadataForURL(void* thisInterface,
     NSString *key = [[idNode stringValue] stringByTrimmingCharactersInSet:setForTrim];
     NSString *path = [[hrefNode stringValue] stringByTrimmingCharactersInSet:setForTrim];
     path = [path stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-    [manifest setObject:path forKey:key];
+    manifest[key] = path;
   }
   xpath = @"/package/spine/itemref/@idref";
   nodes = [xmlDoc nodesForXPath:xpath error:NULL];
   if(![nodes count]) {
     NSLog(@"no such nodes for xpath '%@'", xpath);
-    [xmlDoc release];
-    [unzip release];
-    [pool release];
     return FALSE;
   }
   NSString *opfBasePath = [opfPath stringByDeletingLastPathComponent];
   for(NSXMLNode *node in nodes) {
     NSString *idrefValue = [[node stringValue] stringByTrimmingCharactersInSet:setForTrim];
-    NSString *hrefValue = [manifest objectForKey:idrefValue];
+    NSString *hrefValue = manifest[idrefValue];
     if(![hrefValue length]) continue;
     NSString *path = nil;
     if([hrefValue isAbsolutePath]) path = [hrefValue substringFromIndex:1];
@@ -208,76 +188,57 @@ Boolean GetMetadataForURL(void* thisInterface,
       if(htmlDoc) {
         NSArray *nodes = [htmlDoc nodesForXPath:@"/html" error:NULL];
         if([nodes count]) {
-          NSXMLNode *bodyNode = [nodes objectAtIndex:0];
+          NSXMLNode *bodyNode = nodes[0];
           NSString *bodyString = [bodyNode stringValue];
           [bodies addObject:bodyString];
         }
       }
-      [htmlDoc release];
     }
   }
-  [xmlDoc release];
-  [unzip release];
 
   if([titles count]) {
     NSString *titleString = [titles componentsJoinedByString:@", "];
-    [(NSMutableDictionary *)attributes setObject:titleString
-                                         forKey:(NSString *)kMDItemTitle];
+    NSAttribs[(NSString *)kMDItemTitle] = titleString;
   }
   if([authors count]) {
-    [(NSMutableDictionary *)attributes setObject:authors
-                                          forKey:(NSString *)kMDItemAuthors];
+    NSAttribs[(NSString *)kMDItemAuthors] = authors;
   }
   if([subjects count]) {
-    [(NSMutableDictionary *)attributes setObject:subjects
-                                          forKey:(NSString *)kMDItemKeywords];
+    NSAttribs[(NSString *)kMDItemKeywords] = subjects;
   }
   if([description length]) {
-    [(NSMutableDictionary *)attributes setObject:description
-                                          forKey:(NSString *)kMDItemDescription];
-    [(NSMutableDictionary *)attributes setObject:description
-                                          forKey:(NSString *)kMDItemHeadline];
+    NSAttribs[(NSString *)kMDItemDescription] = description;
+    NSAttribs[(NSString *)kMDItemHeadline] = description;
   }
   if([publishers count]) {
-    [(NSMutableDictionary *)attributes setObject:publishers
-                                          forKey:(NSString *)kMDItemPublishers];
-    [(NSMutableDictionary *)attributes setObject:publishers
-                                          forKey:(NSString *)kMDItemOrganizations];
+    NSAttribs[(NSString *)kMDItemPublishers] = publishers;
+    NSAttribs[(NSString *)kMDItemOrganizations] = publishers;
   }
   if([contributors count]) {
-    [(NSMutableDictionary *)attributes setObject:contributors
-                                          forKey:(NSString *)kMDItemContributors];
+    NSAttribs[(NSString *)kMDItemContributors] = contributors;
   }
   if([identifiers count]) {
     NSString *idString = [identifiers componentsJoinedByString:@", "];
-    [(NSMutableDictionary *)attributes setObject:idString
-                                         forKey:(NSString *)kMDItemIdentifier];
+    NSAttribs[(NSString *)kMDItemIdentifier] = idString;
   }
   if([languages count]) {
-    [(NSMutableDictionary *)attributes setObject:languages
-                                          forKey:(NSString *)kMDItemLanguages];
+    NSAttribs[(NSString *)kMDItemLanguages] = languages;
   }
   if([coverage length]) {
-    [(NSMutableDictionary *)attributes setObject:coverage
-                                          forKey:(NSString *)kMDItemCoverage];
+    NSAttribs[(NSString *)kMDItemCoverage] = coverage;
   }
   if([copyright length]) {
-    [(NSMutableDictionary *)attributes setObject:copyright
-                                          forKey:(NSString *)kMDItemCopyright];
-    [(NSMutableDictionary *)attributes setObject:copyright
-                                          forKey:(NSString *)kMDItemRights];
+    NSAttribs[(NSString *)kMDItemCopyright] = copyright;
+    NSAttribs[(NSString *)kMDItemRights] = copyright;
   }
   if([bodies count]) {
     NSString *bodyString = [bodies componentsJoinedByString:@" "];
-    [(NSMutableDictionary *)attributes setObject:bodyString
-                                          forKey:(NSString *)kMDItemTextContent];
+    NSAttribs[(NSString *)kMDItemTextContent] = bodyString;
 
-    NSNumber *numberOfPages = [NSNumber numberWithInteger:[bodies count]];
-    [(NSMutableDictionary *)attributes setObject:numberOfPages
-                                          forKey:(NSString *)kMDItemNumberOfPages];
+    NSAttribs[(NSString *)kMDItemNumberOfPages] = @([bodies count]);
   }
 
-  [pool release];
+  }
 
   return TRUE;
 }
