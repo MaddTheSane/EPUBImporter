@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		2C05A19C06CAA52B00D84F6F /* GetMetadataForFile.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C05A19B06CAA52B00D84F6F /* GetMetadataForFile.m */; };
+		55DEE4DA183C386C00AEF9DA /* schema.xml in Resources */ = {isa = PBXBuildFile; fileRef = C88FB7D7067446EC006EBB30 /* schema.xml */; };
 		8D576312048677EA00EA77CD /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 08FB77B6FE84183AC02AAC07 /* main.c */; settings = {ATTRIBUTES = (); }; };
 		8D576314048677EA00EA77CD /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0AA1909FFE8422F4C02AAC07 /* CoreFoundation.framework */; };
 		8D5B49A804867FD3000E48DA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8D5B49A704867FD3000E48DA /* InfoPlist.strings */; };
@@ -173,6 +174,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				55DEE4DA183C386C00AEF9DA /* schema.xml in Resources */,
 				8D5B49A804867FD3000E48DA /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

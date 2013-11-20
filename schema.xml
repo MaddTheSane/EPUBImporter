@@ -25,14 +25,33 @@
     -->
 
     <types>
-        <type name="SUPPORTED_UTI_TYPE">  <!-- add one <type>...</type> entry for each UTI that you need to define. -->
+        <type name="org.idpf.epub-container">  <!-- add one <type>...</type> entry for each UTI that you need to define. -->
          
             <!-- 'allattrs' is a whitespace separated list of all of the attributes that this UTI type normally has.
                  It does not have to be exhaustive. -->
             <allattrs>
+				kMDItemTitle
+				kMDItemAuthors
+				kMDItemKeywords
+				kMDItemDescription
+				kMDItemHeadline
+				kMDItemPublishers
+				kMDItemOrganizations
+				kMDItemLanguages
+				kMDItemNumberOfPages
+				kMDItemTextContent
+				kMDItemContributors
+				kMDItemIdentifier
+				kMDItemCoverage
+				kMDItemCopyright
+				kMDItemRights
             </allattrs>
             <!-- 'displayattrs' is a whitespace separated list of the attributes that should normally be displayed when previewing files of this UTI type. -->
             <displayattrs>
+				kMDItemTitle
+				kMDItemAuthors
+				kMDItemNumberOfPages
+				kMDItemCopyright
             </displayattrs>
             
         </type>

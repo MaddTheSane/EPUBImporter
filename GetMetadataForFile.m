@@ -59,9 +59,7 @@ Boolean GetMetadataForURL(void* thisInterface,
 	
 	@autoreleasepool {
 		NSMutableDictionary *NSAttribs = (__bridge NSMutableDictionary *)attributes;
-		
 		NSCharacterSet *setForTrim = [NSCharacterSet whitespaceAndNewlineCharacterSet];
-		
 		NSString *path = [(__bridge NSURL *)urlForFile path];
 		GNJUnZip *unzip = [[GNJUnZip alloc] initWithZipFile:path];
 		
@@ -103,14 +101,14 @@ Boolean GetMetadataForURL(void* thisInterface,
 			return FALSE;
 		}
 		
-		NSMutableArray *titles = [NSMutableArray array];
-		NSMutableArray *authors = [NSMutableArray array];
-		NSMutableArray *subjects = [NSMutableArray array];
+		NSMutableArray *titles = [[NSMutableArray alloc] init];
+		NSMutableArray *authors = [[NSMutableArray alloc] init];
+		NSMutableArray *subjects = [[NSMutableArray alloc] init];
 		NSString *description = nil;
-		NSMutableArray *publishers = [NSMutableArray array];
-		NSMutableArray *contributors = [NSMutableArray array];
-		NSMutableArray *identifiers = [NSMutableArray array];
-		NSMutableArray *languages = [NSMutableArray array];
+		NSMutableArray *publishers = [[NSMutableArray alloc] init];
+		NSMutableArray *contributors = [[NSMutableArray alloc] init];
+		NSMutableArray *identifiers = [[NSMutableArray alloc] init];
+		NSMutableArray *languages = [[NSMutableArray alloc] init];
 		NSString *coverage = nil;
 		NSString *copyright = nil;
 		
@@ -148,15 +146,15 @@ Boolean GetMetadataForURL(void* thisInterface,
 			}
 		}
 		
-		NSMutableArray *bodies = [NSMutableArray array];
+		NSMutableArray *bodies = [[NSMutableArray alloc] init];
 		xpath = @"/package/manifest/item";
 		nodes = [xmlDoc nodesForXPath:xpath error:NULL];
 		if(![nodes count]) {
 			NSLog(@"no such nodes for xpath '%@'", xpath);
 			return FALSE;
 		}
-		NSMutableDictionary *manifest = [NSMutableDictionary dictionary];
-		for(NSXMLElement *elem in nodes) {
+		NSMutableDictionary *manifest = [[NSMutableDictionary alloc] init];
+		for (NSXMLElement *elem in nodes) {
 			NSXMLNode *idNode = [elem attributeForName:@"id"];
 			NSXMLNode *hrefNode = [elem attributeForName:@"href"];
 			NSString *key = [[idNode stringValue] stringByTrimmingCharactersInSet:setForTrim];
@@ -166,7 +164,7 @@ Boolean GetMetadataForURL(void* thisInterface,
 		}
 		xpath = @"/package/spine/itemref/@idref";
 		nodes = [xmlDoc nodesForXPath:xpath error:NULL];
-		if(![nodes count]) {
+		if (![nodes count]) {
 			NSLog(@"no such nodes for xpath '%@'", xpath);
 			return FALSE;
 		}
@@ -200,28 +198,27 @@ Boolean GetMetadataForURL(void* thisInterface,
 			NSAttribs[(NSString *)kMDItemTitle] = titleString;
 		}
 		if([authors count]) {
-			NSAttribs[(NSString *)kMDItemAuthors] = authors;
+			NSAttribs[(NSString *)kMDItemAuthors] = [authors copy];
 		}
 		if([subjects count]) {
-			NSAttribs[(NSString *)kMDItemKeywords] = subjects;
+			NSAttribs[(NSString *)kMDItemKeywords] = [subjects copy];
 		}
 		if([description length]) {
 			NSAttribs[(NSString *)kMDItemDescription] = description;
 			NSAttribs[(NSString *)kMDItemHeadline] = description;
 		}
 		if([publishers count]) {
-			NSAttribs[(NSString *)kMDItemPublishers] = publishers;
-			NSAttribs[(NSString *)kMDItemOrganizations] = publishers;
+			NSAttribs[(NSString *)kMDItemPublishers] = NSAttribs[(NSString *)kMDItemOrganizations] = [publishers copy];
 		}
 		if([contributors count]) {
-			NSAttribs[(NSString *)kMDItemContributors] = contributors;
+			NSAttribs[(NSString *)kMDItemContributors] = [contributors copy];
 		}
 		if([identifiers count]) {
 			NSString *idString = [identifiers componentsJoinedByString:@", "];
 			NSAttribs[(NSString *)kMDItemIdentifier] = idString;
 		}
 		if([languages count]) {
-			NSAttribs[(NSString *)kMDItemLanguages] = languages;
+			NSAttribs[(NSString *)kMDItemLanguages] = [languages copy];
 		}
 		if([coverage length]) {
 			NSAttribs[(NSString *)kMDItemCoverage] = coverage;
@@ -236,7 +233,6 @@ Boolean GetMetadataForURL(void* thisInterface,
 			
 			NSAttribs[(NSString *)kMDItemNumberOfPages] = @([bodies count]);
 		}
-		
 		return TRUE;
 	}
 }
